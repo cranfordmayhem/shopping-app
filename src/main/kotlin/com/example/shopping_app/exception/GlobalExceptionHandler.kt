@@ -19,11 +19,7 @@ class GlobalExceptionHandler {
                 "status" to status,
                 "error" to error,
                 "path" to request.requestURI
-            )
-        }
-        fun errorHandler(error: String) {
-
-            return logger.error("ERROR: $error")
+            ).also { logger.error("ERROR: $error") }
         }
     }
 
@@ -34,7 +30,6 @@ class GlobalExceptionHandler {
         val error = handler.message.toString()
 
         return ErrorUtil.errorMapper(HttpStatus.UNAUTHORIZED.value(), error, request)
-            .also { ErrorUtil.errorHandler(error) }
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -44,7 +39,6 @@ class GlobalExceptionHandler {
         val error = handler.message.toString()
 
         return ErrorUtil.errorMapper(HttpStatus.NOT_FOUND.value(), error, request)
-            .also { ErrorUtil.errorHandler(error) }
     }
 
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -54,7 +48,6 @@ class GlobalExceptionHandler {
         val error = handler.message.toString()
 
         return ErrorUtil.errorMapper(HttpStatus.UNAUTHORIZED.value(), error, request)
-            .also { ErrorUtil.errorHandler(error) }
     }
 
 }
