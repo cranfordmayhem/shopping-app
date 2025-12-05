@@ -10,6 +10,12 @@ fun UserAccountRequest.toEntity(role: Role): UserAccount = UserAccount(
     role = role
 )
 
+fun AccountUpdateRequest.toEntity(): UserAccount = UserAccount(
+    email = this.email,
+    password = this.password,
+    role = this.role
+)
+
 fun UserAccount.toResponse(): UserAccountResponse = UserAccountResponse(
     id = this.id,
     email = this.email,

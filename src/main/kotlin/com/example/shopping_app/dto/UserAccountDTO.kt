@@ -12,6 +12,13 @@ data class UserAccountRequest(
     val password: String
 )
 
+data class AccountUpdateRequest(
+    @field:Email(message="Email must be valid")
+    val email: String,
+    val password: String,
+    val role: Role
+)
+
 data class UserAccountResponse(
     val id: Long,
     val email: String,

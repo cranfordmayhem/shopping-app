@@ -2,6 +2,7 @@ package com.example.shopping_app.exception
 
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
@@ -21,6 +22,16 @@ class GlobalExceptionHandler {
                 "path" to request.requestURI
             ).also { logger.error("ERROR: $error") }
         }
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(DataIntegrityViolationException::class)
+    fun handleDataIntegrity(handler: DataIntegrityViolationException, request: HttpServletRequest):
+            Map<String, Any>{
+
+        val error = handler.message.toString()
+
+        return ErrorUtil.errorMapper(HttpStatus.BAD_REQUEST.value(), error, request)
     }
 
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -48,6 +59,15 @@ class GlobalExceptionHandler {
         val error = handler.message.toString()
 
         return ErrorUtil.errorMapper(HttpStatus.UNAUTHORIZED.value(), error, request)
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(IdNotFoundException::class)
+    fun handleIdNotFound(handler: IdNotFoundException, request: HttpServletRequest):
+            Map<String, Any> {
+        val error = handler.message.toString()
+
+        return ErrorUtil.errorMapper(HttpStatus.NOT_FOUND.value(), error, request)
     }
 
 }
