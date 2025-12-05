@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 
@@ -14,7 +15,7 @@ class GlobalExceptionHandler {
 
         private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 
-        fun errorMapper(status: Int, error: String, request: HttpServletRequest): Map<String, Any> {
+        fun errorMapper(status: Int, error: Any, request: HttpServletRequest): Map<String, Any> {
             return mapOf(
                 "timestamp" to LocalDateTime.now(),
                 "status" to status,
@@ -32,6 +33,18 @@ class GlobalExceptionHandler {
         val error = handler.message.toString()
 
         return ErrorUtil.errorMapper(HttpStatus.BAD_REQUEST.value(), error, request)
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleValidationException(
+        handler: MethodArgumentNotValidException,
+        request: HttpServletRequest)
+    : Map<String, Any> {
+        val errors = handler.bindingResult.fieldErrors
+            .associate { it.field to (it.defaultMessage ?: "Invalid" ) }
+
+        return ErrorUtil.errorMapper(HttpStatus.BAD_REQUEST.value(), errors, request)
     }
 
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -75,3 +88,4 @@ class GlobalExceptionHandler {
 class InvalidTokenException(message: String): RuntimeException(message)
 class UserNotFoundException(email: String): RuntimeException("User $email not found")
 class AuthUserException(): RuntimeException("Username or Password is invalid")
+class IdNotFoundException(id: Long, entity: String): RuntimeException("$entity with $id not found")
