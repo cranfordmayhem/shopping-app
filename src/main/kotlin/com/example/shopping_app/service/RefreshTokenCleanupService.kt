@@ -24,7 +24,7 @@ class RefreshTokenCleanupService(private val refreshTokenRepo: RefreshTokenRepos
         cleanup()
     }
 
-    @Scheduled(cron="0 0 2 * * ?")
+    @Scheduled(cron="0 */30 * * * *")
     fun scheduledCleanup() {
         logger.info("Running scheduled refresh token cleanup")
         cleanup()
