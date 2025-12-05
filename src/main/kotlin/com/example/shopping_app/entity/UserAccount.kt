@@ -22,4 +22,4 @@ data class UserAccount(
 
     @OneToOne(mappedBy = "user", fetch=FetchType.LAZY, cascade = [CascadeType.ALL])
     var profile: UserProfile? = null
-)
+): Auditor()

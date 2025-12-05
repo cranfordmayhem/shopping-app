@@ -30,4 +30,4 @@ data class RefreshToken(
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="user_account_id", nullable=false)
     val userAccount: UserAccount
-)
+): Auditor()

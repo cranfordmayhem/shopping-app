@@ -21,4 +21,4 @@ data class UserProfile(
 
     @Column(nullable=false)
     val age: Int
-)
+) : Auditor()
