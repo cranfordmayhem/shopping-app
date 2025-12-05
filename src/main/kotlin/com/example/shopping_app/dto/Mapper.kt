@@ -2,6 +2,7 @@ package com.example.shopping_app.dto
 
 import com.example.shopping_app.entity.*
 import com.example.shopping_app.entity.enums.Role
+import java.time.Instant
 
 fun UserAccountRequest.toEntity(role: Role): UserAccount = UserAccount(
     email = this.email,
@@ -29,4 +30,11 @@ fun UserProfile.toResponse(): UserProfileResponse = UserProfileResponse(
     lastName = this.lastName,
     age = this.age,
     email = user.email
+)
+
+fun RefreshTokenRequest.toEntity(user: UserAccount, expiryDate: Instant):
+        RefreshToken = RefreshToken(
+            token = this.token,
+            expiryDate = expiryDate,
+            userAccount = user
 )
