@@ -14,3 +14,19 @@ fun UserAccount.toResponse(): UserAccountResponse = UserAccountResponse(
     email = this.email,
     role = this.role
 )
+
+
+fun UserProfile.toEntity(user: UserAccount): UserProfile = UserProfile(
+    firstName = this.firstName,
+    lastName = this.lastName,
+    age = this.age,
+    user = user
+)
+
+fun UserProfile.toResponse(): UserProfileResponse = UserProfileResponse(
+    id = this.id,
+    firstName = this.firstName,
+    lastName = this.lastName,
+    age = this.age,
+    email = user.email
+)
