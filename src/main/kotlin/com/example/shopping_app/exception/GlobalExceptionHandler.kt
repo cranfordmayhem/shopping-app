@@ -83,9 +83,29 @@ class GlobalExceptionHandler {
         return ErrorUtil.errorMapper(HttpStatus.NOT_FOUND.value(), error, request)
     }
 
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(UnauthorizedException::class)
+    fun handleUnauthorized(handler: UnauthorizedException, request: HttpServletRequest):
+            Map<String, Any> {
+        val error = handler.message.toString()
+
+        return ErrorUtil.errorMapper(HttpStatus.UNAUTHORIZED.value(), error, request)
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(UnauthenticatedException::class)
+    fun handleUnauthenticated(handler: UnauthenticatedException, request: HttpServletRequest):
+            Map<String, Any> {
+        val error = handler.message.toString()
+
+        return ErrorUtil.errorMapper(HttpStatus.UNAUTHORIZED.value(), error, request)
+    }
+
 }
 
 class InvalidTokenException(message: String): RuntimeException(message)
 class UserNotFoundException(email: String): RuntimeException("User $email not found")
 class AuthUserException(): RuntimeException("Username or Password is invalid")
 class IdNotFoundException(id: Long, entity: String): RuntimeException("$entity with $id not found")
+class UnauthorizedException(id: Long, entity: String, action: String): RuntimeException("Not authorized to $action $entity $id")
+class UnauthenticatedException(): RuntimeException("User not authenticated")
