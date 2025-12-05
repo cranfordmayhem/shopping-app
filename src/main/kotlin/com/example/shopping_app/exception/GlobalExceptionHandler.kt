@@ -2,7 +2,8 @@ package com.example.shopping_app.exception
 
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
-import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 
 @RestControllerAdvice
@@ -26,4 +27,38 @@ class GlobalExceptionHandler {
         }
     }
 
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(InvalidTokenException::class)
+    fun handleInvalidToken(handler: InvalidTokenException, request: HttpServletRequest):
+            Map<String, Any> {
+        val error = handler.message.toString()
+
+        return ErrorUtil.errorMapper(HttpStatus.UNAUTHORIZED.value(), error, request)
+            .also { ErrorUtil.errorHandler(error) }
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(UserNotFoundException::class)
+    fun handleUserNotFound(handler: UserNotFoundException, request: HttpServletRequest):
+            Map<String, Any> {
+        val error = handler.message.toString()
+
+        return ErrorUtil.errorMapper(HttpStatus.NOT_FOUND.value(), error, request)
+            .also { ErrorUtil.errorHandler(error) }
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(AuthUserException::class)
+    fun handleAuthUser(handler: AuthUserException, request: HttpServletRequest):
+            Map<String, Any> {
+        val error = handler.message.toString()
+
+        return ErrorUtil.errorMapper(HttpStatus.UNAUTHORIZED.value(), error, request)
+            .also { ErrorUtil.errorHandler(error) }
+    }
+
 }
+
+class InvalidTokenException(message: String): RuntimeException(message)
+class UserNotFoundException(email: String): RuntimeException("User $email not found")
+class AuthUserException(): RuntimeException("Username or Password is invalid")
