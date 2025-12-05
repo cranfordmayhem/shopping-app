@@ -10,10 +10,10 @@ fun UserAccountRequest.toEntity(role: Role): UserAccount = UserAccount(
     role = role
 )
 
-fun AccountUpdateRequest.toEntity(): UserAccount = UserAccount(
-    email = this.email,
-    password = this.password,
-    role = this.role
+fun AccountUpdateRequest.toEntity(existing: UserAccount): UserAccount = existing.copy(
+    email = this.email ?: existing.email,
+    password = this.password ?: existing.password,
+    role = this.role ?: existing.role
 )
 
 fun UserAccount.toResponse(): UserAccountResponse = UserAccountResponse(
@@ -23,7 +23,7 @@ fun UserAccount.toResponse(): UserAccountResponse = UserAccountResponse(
 )
 
 
-fun UserProfile.toEntity(user: UserAccount): UserProfile = UserProfile(
+fun UserProfileRequest.toEntity(user: UserAccount): UserProfile = UserProfile(
     firstName = this.firstName,
     lastName = this.lastName,
     age = this.age,

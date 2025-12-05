@@ -5,6 +5,7 @@ import com.example.shopping_app.entity.enums.Role
 import com.example.shopping_app.exception.IdNotFoundException
 import com.example.shopping_app.repository.UserAccountRepository
 import com.example.shopping_app.utils.AuthEmailUtil
+import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.repository.findByIdOrNull
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service
 class UserAccountService(
     private val accountRepo: UserAccountRepository,
     private val authEmail: AuthEmailUtil,
+    private val authService: AuthenticationService,
     private val passwordEncoder: PasswordEncoder
 ) {
     private val logger = LoggerFactory.getLogger(UserAccountService::class.java)
@@ -46,7 +48,7 @@ class UserAccountService(
         }?.toResponse().also { logger.info("Account retrieved successfully") }
             ?: throw IdNotFoundException(id, "Account")
 
-    fun update(id: Long, accUpdateReq: AccountUpdateRequest, userEmail: String): UserAccountResponse =
+    fun update(id: Long, accUpdateReq: AccountUpdateRequest, userEmail: String, response: HttpServletResponse): UserAccountResponse =
         accountRepo.findByIdOrNull(id)?.apply {
             logger.debug("Updating account with $id")
             val user = authEmail.checkUser(userEmail)
@@ -55,15 +57,21 @@ class UserAccountService(
                 user, "update", "Account"
             )
         }?.let { existing ->
-            val newData = accUpdateReq.toEntity()
+            val newData = accUpdateReq.toEntity(existing)
             val hashedPass = passwordEncoder.encode(newData.password)
+
+            val logout = if(newData.email != existing.email) true else false
 
             val updated = existing.copy(
                 email = newData.email,
-                password = hashedPass
+                password = hashedPass,
+                role = newData.role
             )
             accountRepo.save(updated).toResponse()
-                .also { logger.info("Account updated successfully") }
+                .also {
+                    logger.info("Account updated successfully")
+                    if (logout) authService.logout(response)
+                }
         } ?: throw IdNotFoundException(id, "Account")
 
     fun delete(id: Long, userEmail: String) =

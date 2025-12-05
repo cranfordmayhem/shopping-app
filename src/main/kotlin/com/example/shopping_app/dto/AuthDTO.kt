@@ -4,11 +4,11 @@ import com.example.shopping_app.entity.enums.Role
 import jakarta.validation.constraints.*
 
 data class LoginRequest(
-    @field:NotBlank("Username is required")
-    @field:Email("Username must be a valid email")
+    @field:NotBlank(message="Username is required")
+    @field:Email(message="Username must be a valid email")
     val username: String,
 
-    @field:NotBlank("Password is required")
+    @field:NotBlank(message="Password is required")
     val password: String
 )
 
