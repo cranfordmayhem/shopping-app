@@ -106,6 +106,6 @@ class GlobalExceptionHandler {
 class InvalidTokenException(message: String): RuntimeException(message)
 class UserNotFoundException(email: String): RuntimeException("User $email not found")
 class AuthUserException(): RuntimeException("Username or Password is invalid")
-class IdNotFoundException(id: Long, entity: String): RuntimeException("$entity with $id not found")
-class UnauthorizedException(id: Long, entity: String, action: String): RuntimeException("Not authorized to $action $entity $id")
+class IdNotFoundException(id: Any, entity: String): RuntimeException("$entity with $id not found")
+class UnauthorizedException(entity: String, action: String): RuntimeException("Not authorized to $action $entity")
 class UnauthenticatedException(): RuntimeException("User not authenticated")
