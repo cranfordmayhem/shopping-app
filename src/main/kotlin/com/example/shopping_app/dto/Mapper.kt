@@ -1,7 +1,9 @@
 package com.example.shopping_app.dto
 
 import com.example.shopping_app.entity.*
+import com.example.shopping_app.entity.embedded.*
 import com.example.shopping_app.entity.enums.Role
+import java.math.BigDecimal
 import java.time.Instant
 
 fun UserAccountRequest.toEntity(role: Role): UserAccount = UserAccount(
