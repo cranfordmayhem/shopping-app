@@ -44,3 +44,24 @@ fun RefreshTokenRequest.toEntity(user: UserAccount, expiryDate: Instant):
             expiryDate = expiryDate,
             userAccount = user
 )
+
+fun UserAddressRequest.toEntity(user: UserAccount): UserAddress = UserAddress(
+    city = this.city,
+    state = this.state,
+    zipCode = this.zipCode,
+    country = this.country,
+    contactNumber = this.contactNumber,
+    isDefault = true,
+    user = user
+)
+
+fun UserAddress.toResponse(): UserAddressResponse = UserAddressResponse(
+    id = this.id,
+    city = this.city,
+    state = this.state,
+    zipCode = this.zipCode,
+    country = this.country,
+    contactNumber = this.contactNumber,
+    isDefault = this.isDefault,
+    userId = this.user.id
+)
