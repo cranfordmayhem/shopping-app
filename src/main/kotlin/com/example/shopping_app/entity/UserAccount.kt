@@ -21,5 +21,12 @@ data class UserAccount(
     var role: Role,
 
     @OneToOne(mappedBy = "user", fetch=FetchType.LAZY, cascade = [CascadeType.ALL])
-    var profile: UserProfile? = null
-): Auditor()
+    var profile: UserProfile? = null,
+
+    @OneToMany(mappedBy = "user", fetch=FetchType.LAZY, cascade = [CascadeType.ALL])
+    var addresses: MutableList<UserAddress> = mutableListOf()
+): Auditor() {
+    override fun toString() = "UserAccount(id=$id, email=$email)"
+    override fun equals(other: Any?) = other is UserAccount && other.id == id
+    override fun hashCode() = id.hashCode()
+}
