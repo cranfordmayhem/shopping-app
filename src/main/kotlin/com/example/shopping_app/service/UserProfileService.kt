@@ -33,19 +33,19 @@ class UserProfileService(
 
     fun retrieveById(id: Long, userEmail: String): UserProfileResponse? =
         profileRepo.findByIdOrNull(id)?.apply {
-            val user = authEmail.checkUser(userEmail)
-            authEmail.verifyUser(
-                id, this.user.email,
-                user, "retrieve", "Profile"
-            )
+            val user = authEmail.checkAndVerifyUser(
+                this.user.email, userEmail,
+                "retrieve", "Profile"
+                )
         }?.toResponse().also { logger.info("Profile with $id retrieved successfully") }
             ?: throw IdNotFoundException(id, "Profile")
 
     fun update(id: Long, profUpdateReq: UserProfileRequest, userEmail: String): UserProfileResponse =
         profileRepo.findByIdOrNull(id)?.let { existing ->
-            val user = authEmail.checkUser(userEmail)
-            authEmail.verifyUser(id, existing.user.email, user, "update", "profile")
-
+            val user = authEmail.checkAndVerifyUser(
+                existing.user.email, userEmail,
+                "update", "Profile"
+            )
             val newProfData = profUpdateReq.toEntity(existing.user)
             val updated = existing.copy(
                 firstName = newProfData.firstName,
@@ -59,10 +59,9 @@ class UserProfileService(
 
     fun delete(id: Long, userEmail: String) =
         profileRepo.findByIdOrNull(id)?.apply {
-            val user = authEmail.checkUser(userEmail)
-            authEmail.verifyUser(
-                id, this.user.email,
-                user, "delete", "Profile"
+            val user = authEmail.checkAndVerifyUser(
+                this.user.email, userEmail,
+                "delete", "Profile"
             )
         }?.let { profileRepo.deleteById(id).also { logger.info("Profile deleted successfully") } }
             ?: throw IdNotFoundException(id, "Profile")

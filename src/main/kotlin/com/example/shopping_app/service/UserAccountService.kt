@@ -40,10 +40,9 @@ class UserAccountService(
     fun retrieveById(id: Long, userEmail: String): UserAccountResponse =
         accountRepo.findByIdOrNull(id)?.apply {
             logger.debug("Retrieving account with $id")
-            val user = authEmail.checkUser(userEmail)
-            authEmail.verifyUser(
-                id, this.email,
-                user, "retrieve", "User"
+            val user = authEmail.checkAndVerifyUser(
+                this.email, userEmail,
+                "retrieve", "User"
             )
         }?.toResponse().also { logger.info("Account retrieved successfully") }
             ?: throw IdNotFoundException(id, "Account")
@@ -51,10 +50,9 @@ class UserAccountService(
     fun update(id: Long, accUpdateReq: AccountUpdateRequest, userEmail: String, response: HttpServletResponse): UserAccountResponse =
         accountRepo.findByIdOrNull(id)?.apply {
             logger.debug("Updating account with $id")
-            val user = authEmail.checkUser(userEmail)
-            authEmail.verifyUser(
-                id, this.email,
-                user, "update", "Account"
+            val user = authEmail.checkAndVerifyUser(
+                this.email, userEmail,
+                "update", "Account"
             )
         }?.let { existing ->
             val newData = accUpdateReq.toEntity(existing)
@@ -76,9 +74,9 @@ class UserAccountService(
 
     fun delete(id: Long, userEmail: String) =
         accountRepo.findByIdOrNull(id)?. apply {
-            val user = authEmail.checkUser(userEmail)
-            authEmail.verifyUser(id, this.email,
-                user, "delete", "Account"
+            val user = authEmail.checkAndVerifyUser(
+                this.email, userEmail,
+                "delete", "Account"
             )
         }?.let {
             accountRepo.deleteById(id).also { logger.info("Account deleted successfully") }

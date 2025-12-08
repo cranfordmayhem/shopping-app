@@ -16,9 +16,12 @@ class AuthEmailUtil(
             ?: throw UserNotFoundException(userEmail)
     }
 
-    fun verifyUser(id: Long, processedEmail: String, user: UserAccount, action: String, entity: String) {
+    fun checkAndVerifyUser(processedEmail: String, userEmail: String, action: String, entity: String): UserAccount {
+        val user = accountRepo.findByEmail(userEmail)
+            ?: throw UserNotFoundException(userEmail)
         if(processedEmail != user.email && user.role != Role.ADMIN)
-            throw UnauthorizedException(id, entity, action)
+            throw UnauthorizedException(entity, action)
+        return user
     }
 
     fun getUser(): String {
