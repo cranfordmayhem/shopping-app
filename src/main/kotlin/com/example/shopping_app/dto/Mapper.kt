@@ -65,3 +65,55 @@ fun UserAddress.toResponse(): UserAddressResponse = UserAddressResponse(
     isDefault = this.isDefault,
     userId = this.user.id
 )
+
+fun ProductRequest.toEntity(): Products = Products(
+    name = this.name,
+    imageUrl = this.imageUrl,
+    description = this.description,
+    price = this.price,
+    stock = this.stock ?: 0
+)
+
+fun Products.toResponse(): ProductResponse = ProductResponse(
+    id = this.id,
+    name = this.name,
+    imageUrl = this.imageUrl,
+    description = this.description,
+    price = this.price,
+    stock = this.stock
+)
+
+fun CartRequest.toEntity(user: UserAccount, product: Products): Cart = Cart(
+    id = CartId(userId = user.id, productId = product.id),
+    user = user,
+    product = product,
+    quantity = this.quantity
+)
+
+fun Cart.toResponse(): CartResponse = CartResponse(
+    userId = this.user.id,
+    product = CartProductResponse(
+        id = this.product.id,
+        imageUrl = this.product.imageUrl,
+        name = this.product.name,
+        price = this.product.price
+    ),
+    quantity = this.quantity
+)
+fun Orders.toResponse(items: List<OrderItem>): OrderResponse = OrderResponse(
+    id = this.id,
+    userId = this.user.id,
+    addressId = this.address.id,
+    totalAmount = this.calculateTotalAmount(),
+    status = this.status,
+    items = this.items.map { it.toResponse() }
+)
+
+fun OrderItem.toResponse(): OrderItemResponse = OrderItemResponse(
+    id = this.id,
+    orderId = this.order.id,
+    productId = this.products.id,
+    snapshotPrice = this.snapshotPrice,
+    quantity = this.quantity,
+    price = this.price
+)
