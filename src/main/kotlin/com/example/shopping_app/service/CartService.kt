@@ -25,16 +25,20 @@ class CartService(
         val user = authEmail.checkUser(userEmail)
         val product = productRepo.findByIdOrNull(request.productId)
             ?: throw IdNotFoundException(request.productId, "Product")
+        if(request.quantity > product.stock)
+            throw IllegalArgumentException("Cannot add more than ${product.stock} items")
 
-        val cartId = CartId(user.id, product.id)
-        val cartItem = cartRepo.findById(cartId).orElse(
-            Cart(id = cartId, user = user, product = product, quantity = 0)
-        )
-
-        cartItem.quantity += request.quantity
-        val saved = cartRepo.save(cartItem)
-
-        return saved.toResponse()
+        val existingItem = cartRepo.findByUserIdAndProductId(user.id, product.id)
+        if(existingItem != null) {
+            val newQuantity = existingItem.quantity + request.quantity
+            if(newQuantity > product.stock)
+                throw IllegalArgumentException("Cannot add more than ${product.stock} items")
+            existingItem.quantity = newQuantity
+            return cartRepo.save(existingItem).toResponse()
+        } else {
+            val cartItem = Cart(user = user, product = product, quantity = request.quantity)
+            return cartRepo.save(cartItem).toResponse()
+        }
     }
 
     fun retrieveByUser(pageable: Pageable, userEmail: String): Page<CartResponse> {
@@ -59,6 +63,10 @@ class CartService(
 
         val cart = cartRepo.findById(cartId)
             .orElseThrow { IdNotFoundException(cartId, "Cart") }
+
+        if(quantity.quantity > cart.product.stock)
+            throw IllegalArgumentException("Cannot exceed product stock of ${cart.product.stock}")
+
         cart.quantity = quantity.quantity
 
         return cartRepo.save(cart).toResponse()

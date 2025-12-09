@@ -1,5 +1,6 @@
 package com.example.shopping_app.controller
 
+import com.example.shopping_app.dto.UpdateOrderStatusRequest
 import com.example.shopping_app.entity.enums.OrderStatus
 import com.example.shopping_app.service.OrdersService
 import com.example.shopping_app.utils.AuthEmailUtil
@@ -22,8 +23,12 @@ class OrderController(
             orderService.create(it)
         }
 
-    @GetMapping
+    @GetMapping("/all")
     fun getAllOrders(pageable: Pageable) =
+        orderService.retrieveAllOrders(pageable)
+
+    @GetMapping
+    fun getUserOrders(pageable: Pageable) =
         authEmail.getUser().let {
             orderService.retrieveOrders(it, pageable)
         }
@@ -35,10 +40,8 @@ class OrderController(
         }
 
     @PutMapping("/{id}")
-    fun updateOrderStatus(@PathVariable id: Long, status: OrderStatus) =
-        authEmail.getUser().let {
-            orderService.updateStatus(id, status)
-        }
+    fun updateOrderStatus(@PathVariable id: Long, @RequestBody status: UpdateOrderStatusRequest) =
+        orderService.updateStatus(id, status)
 
     @PatchMapping("/{id}/cancel")
     fun cancelOrder(@PathVariable id: Long) =

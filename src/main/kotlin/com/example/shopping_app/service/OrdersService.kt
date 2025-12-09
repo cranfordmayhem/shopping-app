@@ -34,6 +34,18 @@ class OrdersService(
         val cartItems = cartRepo.findByUser(user)
         if(cartItems.isEmpty()) throw IllegalStateException("Cart is empty")
 
+        cartItems.forEach { cart ->
+            if(cart.quantity > cart.product.stock) {
+                throw IllegalStateException(
+                    "Product ${cart.product.name} only has ${cart.product.stock} left in stock"
+                )
+            }
+        }
+
+        cartItems.forEach { cart ->
+            cart.product.stock -= cart.quantity
+        }
+
         val totalAmount = cartItems.fold(BigDecimal.ZERO) { acc, cart ->
             acc + (cart.product.price.multiply(BigDecimal(cart.quantity)))
         }
@@ -63,9 +75,14 @@ class OrdersService(
         return savedOrder.toResponse(orderItems)
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    fun retrieveAllOrders(pageable: Pageable): Page<OrderResponse> {
+        return orderRepo.findAll(pageable).map { it.toResponse(it.items) }
+    }
+
     fun retrieveOrders(userEmail: String, pageable: Pageable): Page<OrderResponse> {
         val user = authEmail.checkUser(userEmail)
-        return orderRepo.findByUser(user, pageable)
+         return orderRepo.findOrdersSorted(user.id, pageable)
             .map { it.toResponse(orderItemRepo.findByOrder(it)) }
     }
 
@@ -79,11 +96,10 @@ class OrdersService(
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    fun updateStatus(orderId: Long, status: OrderStatus): OrderResponse {
+    fun updateStatus(orderId: Long, status: UpdateOrderStatusRequest): OrderResponse {
         val order = orderRepo.findById(orderId)
             .orElseThrow { IdNotFoundException(orderId, "Order") }
-
-        order.status = status
+        order.status = status.status
         return orderRepo.save(order).toResponse(orderItemRepo.findByOrder(order))
     }
 
@@ -93,7 +109,7 @@ class OrdersService(
         val order = orderRepo.findById(orderId)
             .orElseThrow { IdNotFoundException(orderId, "Order") }
         if (order.user.id != user.id) throw UnauthorizedException("update", "Order")
-        if (order.status !in listOf(OrderStatus.PENDING, OrderStatus.PROCESSING))
+        if (order.status !in listOf(OrderStatus.PENDING, OrderStatus.PROCESSING, OrderStatus.SHIPPED))
             throw IllegalStateException("Order cannot be cancelled because it is already ${order.status}")
 
         val now = Instant.now()
@@ -103,6 +119,12 @@ class OrdersService(
 
         if (daysElapsed > 7)
             throw IllegalStateException("Order can only be cancelled within 7 days from the order date")
+
+        order.items.forEach { item ->
+            val product = item.products
+            product.stock += item.quantity
+        }
+
         order.status = OrderStatus.CANCELLED
         val updatedOrder = orderRepo.save(order)
         return updatedOrder.toResponse(orderItemRepo.findByOrder(order))

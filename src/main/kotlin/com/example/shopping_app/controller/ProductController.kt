@@ -35,7 +35,7 @@ class ProductController(
         productService.update(id, updateRequest)
 
     @PatchMapping("/{id}")
-    fun updateStock(@PathVariable id: Long, stock: StockUpdate) =
+    fun updateStock(@PathVariable id: Long, @Valid @RequestBody stock: StockUpdate) =
         productService.updateStock(id, stock)
 
     @ResponseStatus(HttpStatus.NO_CONTENT)

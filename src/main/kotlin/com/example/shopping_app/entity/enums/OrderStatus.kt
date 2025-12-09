@@ -1,5 +1,5 @@
 package com.example.shopping_app.entity.enums
 
 enum class OrderStatus{
-    PENDING, PROCESSING, COMPLETED, CANCELLED
+    PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED
 }

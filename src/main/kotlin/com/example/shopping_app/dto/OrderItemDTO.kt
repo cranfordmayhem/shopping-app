@@ -8,6 +8,7 @@ data class OrderItemResponse(
     val id: OrderItemId,
     val orderId: Long,
     val productId: Long,
+    val productName: String,
     val snapshotPrice: BigDecimal,
     val quantity: Int,
     val price: BigDecimal
